@@ -1,4 +1,4 @@
-# online-class
+# back-stage-management
 
 ## Project setup
 ```
