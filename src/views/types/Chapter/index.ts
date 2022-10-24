@@ -1,20 +1,21 @@
-export interface addChapter {
-    id: number,
-    course: number;
-    name: string;
-    state: number;
+import { Course } from '../Course';
+
+export interface addOrEditChapter {
+  id: number;
+  course: number;
+  name: string;
+  state: number;
+  videoUrl: string;
 }
+
 export interface Chapter {
-    id: number;
-    name: string;
-    courseName: string;
-    courseId: number;
-    info: string;
-    video: string;
-    status: number;
-    statusInfo: string;
-  }
+  id: number;
+  name: string;
+  videoUrl: string;
+  state: number;
+  course: Course;
+}
 
 export interface RouteParams {
-    courseId: number;
-  }
+  courseId: number;
+}

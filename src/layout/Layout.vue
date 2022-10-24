@@ -26,10 +26,10 @@
           <el-icon><Menu /></el-icon>
           <span>课程管理 </span>
         </el-menu-item>
-        <el-menu-item index="2" @click="gotoCourseList">
+        <!-- <el-menu-item index="2" @click="gotoCourseList">
           <el-icon><User /></el-icon>
           <span>客户管理</span>
-        </el-menu-item>
+        </el-menu-item> -->
         <el-menu-item index="3" @click="gotoTeacher">
           <el-icon><Avatar /></el-icon>
           <span>讲师管理</span>

@@ -36,9 +36,8 @@ export const deleteChapterItem = (chapterId) => {
 }
 
 // 更新章节
-export const updateChapterItem = (addChapter) => {
-    const { id, course, name, state } = addChapter
-    console.log(id, course, name, state);
+export const updateChapterItem = (chapterInfo) => {
+    const { id, course, name, state,videoUrl } = chapterInfo
     return request({
         method: 'post',
         url: `/section/update`,
@@ -47,6 +46,7 @@ export const updateChapterItem = (addChapter) => {
             name,
             state,
             course,
+            videoUrl
         }
     })
 }

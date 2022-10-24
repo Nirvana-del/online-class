@@ -26,38 +26,35 @@
         style="width: 100%"
       >
         <el-table-column type="selection" width="55" header-align="center" />
-        <el-table-column
-          label="封面"
-          width="120"
-          align="center"
-          header-align="center"
-        >
+        <el-table-column label="封面" align="center" 
+        width="150"
+        header-align="center">
           <template #default="props">
-            <!-- <img
-              :src="props.row.imageUrl"
-              style="width: 80px; height: 60px"
-            /> -->
-            <span>{{ props.row.imageUrl }}</span>
+            <img
+              :src="props.row.imageUrl == '' ? empty : props.row.imageUrl"
+              style="width: 120px; height: 100px"
+            />
           </template>
         </el-table-column>
         <el-table-column
           property="teacher.teacherName"
           label="讲师"
-          width="120"
+          width="150"
           header-align="center"
           align="center"
         />
         <el-table-column
           property="name"
           label="课程名称"
-          width="120"
           header-align="center"
+          width="250"
           align="center"
         />
         <el-table-column
           property="type"
           label="课程类型"
           align="center"
+          width="150"
           show-overflow-tooltip
         />
         <el-table-column
@@ -65,10 +62,11 @@
           label="课时"
           header-align="center"
           align="center"
-          width="100"
+          width="150"
         >
         </el-table-column>
-        <el-table-column header-align="center" align="center" label="操作">
+        <el-table-column header-align="center" align="center" 
+        label="操作">
           <template #default="props">
             <el-button
               type="default"
@@ -122,7 +120,17 @@
         style="max-width: 460px"
       >
         <el-form-item label="封面">
-          <el-input v-model="state.courseInfo.imageUrl" placeholder="封面" />
+            <el-upload
+              class="avatar-uploader"
+              action="/api/common/uploadImage"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+            >
+              <img v-if="state.courseInfo.imageUrl !== ''" :src="state.courseInfo.imageUrl" 
+              class="avatar" style=" width:200px; height:200px"/>
+              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            </el-upload>
         </el-form-item>
         <el-form-item label="课程名称">
           <el-input v-model="state.courseInfo.name" placeholder="课程名称" />
@@ -163,17 +171,13 @@
 <script lang="ts" setup>
 import router from "@/router";
 import { ref, getCurrentInstance, onMounted, reactive } from "vue";
+import { ElMessage } from "element-plus";
+import { Course } from './types/Course/index';
+import empty from '@/assets/empty.png';
+
 interface Teacher {
   id: number;
   teacherName: string;
-}
-interface Course {
-  id: number;
-  name: string;
-  type: number;
-  imageUrl: string;
-  period: number;
-  teacher: Teacher;
 }
 
 let dialogVisible = ref(false);
@@ -189,7 +193,6 @@ const pagination = reactive({
   pageSize: 5,
   total: 0,
 });
-// const keyWord = ref("");
 function handleCurrentChange(e: any) {
   console.log(e);
   pagination.currentPage = e;
@@ -272,7 +275,31 @@ function toEditCourse(courseItem: Course) {
   console.log(state.courseInfo);
   dialogVisible.value = true;
 }
+const handleAvatarSuccess = (
+  response:any,
+  uploadFile:any
+) => {
+  console.log(response);
+  
+  console.log(uploadFile);
+  const { code, msg, data } = response
+  if(code == '0'){
+    state.courseInfo.imageUrl = data
+  }
+};
 
+const beforeAvatarUpload = (rawFile:any) => {
+  console.log(rawFile);
+
+  if (rawFile.type !== "image/jpeg") {
+    ElMessage.error("Avatar picture must be JPG format!");
+    return false;
+  } else if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("图片大小不能超过 2MB!");
+    return false;
+  }
+  return true;
+};
 function dateFormat(time: string): string {
   var data = new Date(time); //获取年
   var y = data.getFullYear(); //获取月
@@ -312,5 +339,25 @@ onMounted(() => {
     margin-top: 20px;
     float: right;
   }
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>

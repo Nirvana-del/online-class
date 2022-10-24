@@ -20,6 +20,12 @@
     <div class="table">
       <el-table :data="state.chapterList" style="width: 100%" border>
         <el-table-column
+          label="视频地址"
+          prop="videoUrl"
+          header-align="center"
+          align="center"
+        />
+        <el-table-column
           label="章节名"
           prop="name"
           header-align="center"
@@ -91,11 +97,30 @@
         :model="state.chapterList"
         style="max-width: 460px"
       >
-        <el-form-item label="章节名">
+        <el-form-item label="视频地址">
           <el-input
-            v-model="state.addChapter.name"
-            placeholder="章节名"
+            v-model="state.chapterInfo.videoUrl"
+            placeholder="视频地址"
           />
+          <el-upload
+            ref="upload"
+            class="upload-demo"
+            action="/api/common/uploadVideo"
+            :limit="1"
+            :on-success="handleUploadSuccess"
+          >
+            <template #trigger>
+              <el-button type="primary">select file</el-button>
+            </template>
+            <template #tip>
+              <div class="el-upload__tip text-red">
+                limit 1 file, new file will cover the old file
+              </div>
+            </template>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="章节名">
+          <el-input v-model="state.chapterInfo.name" placeholder="章节名" />
         </el-form-item>
         <!-- <el-form-item label="课程ID">
           <el-input
@@ -108,7 +133,11 @@
           <el-input v-model="state.chapterInfo.video" placeholder="视频地址" />
         </el-form-item> -->
         <el-form-item label="当前进度">
-          <el-input v-model="state.addChapter.state" placeholder="当前进度" type="number"/>
+          <el-input
+            v-model="state.chapterInfo.state"
+            placeholder="当前进度"
+            type="number"
+          />
         </el-form-item>
         <!-- <el-form-item label="简介">
           <el-input
@@ -137,33 +166,31 @@ import { ref, reactive } from "@vue/reactivity";
 import { getCurrentInstance, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
-import { addChapter,Chapter,RouteParams } from './types/Chapter';
+import { addOrEditChapter, Chapter, RouteParams } from "./types/Chapter";
 
 const route = useRoute();
 const dialogVisible = ref(false);
 const isEdit = ref(false);
 const state = reactive({
   chapterList: [] as Chapter[],
-  chapterInfo: {} as Chapter,
-  addChapter: {} as addChapter,
+  chapterInfo: {} as addOrEditChapter,
   routeParams: {},
 });
 const pagination = reactive({
   currentPage: 1,
   pageSize: 5,
-  total:0
+  total: 0,
 });
 function handleCurrentChange(e: any) {
   console.log(e);
-  pagination.currentPage = e
-  getChapterList(state.routeParams)
+  pagination.currentPage = e;
+  getChapterList(state.routeParams);
 }
 function handleSizeChange(e: any) {
   console.log(e);
-  pagination.pageSize = e
-  pagination.currentPage = 1
-  getChapterList(state.routeParams)
-
+  pagination.pageSize = e;
+  pagination.currentPage = 1;
+  getChapterList(state.routeParams);
 }
 const { proxy } = getCurrentInstance() as any;
 onMounted(() => {
@@ -173,12 +200,15 @@ onMounted(() => {
 });
 const getChapterList = async (routeParams: any) => {
   const courseId = routeParams.courseId;
-  let res = await proxy.$API.default.chapter.getChapterList(courseId,pagination);
+  let res = await proxy.$API.default.chapter.getChapterList(
+    courseId,
+    pagination
+  );
   console.log(res.data);
-  const { code,msg,data } = res.data;
-  if(code == '0'){
-    state.chapterList = data.sections
-    pagination.total = res.data.data.totalItems
+  const { code, msg, data } = res.data;
+  if (code == "0") {
+    state.chapterList = data.sections;
+    pagination.total = res.data.data.totalItems;
     dialogVisible.value = false;
   }
 };
@@ -191,22 +221,23 @@ function chapterDelete(index: any, row: any) {
 }
 function chapterEdit(index: any, chapterInfo: any) {
   console.log(chapterInfo);
-  state.addChapter.id = chapterInfo.id
+  state.chapterInfo.id = chapterInfo.id;
   isEdit.value = true;
   dialogVisible.value = true;
-  Object.assign(state.addChapter, chapterInfo);
-  const {courseId} = state.routeParams as RouteParams;
-  state.addChapter.course = courseId
+  Object.assign(state.chapterInfo, chapterInfo);
+  const { courseId } = state.routeParams as RouteParams;
+  state.chapterInfo.course = courseId;
 }
 function toAddChapter() {
-  state.addChapter.name = ''
-  state.addChapter.state = 0
+  state.chapterInfo.videoUrl = "";
+  state.chapterInfo.name = "";
+  state.chapterInfo.state = 0;
   isEdit.value = false;
   console.log(state.routeParams);
   dialogVisible.value = true;
-  
-  const {courseId} = state.routeParams as RouteParams;
-  state.addChapter.course = courseId
+
+  const { courseId } = state.routeParams as RouteParams;
+  state.chapterInfo.course = courseId;
   console.log("添加章节");
 }
 function buttonConfirm(): void {
@@ -218,7 +249,7 @@ function buttonConfirm(): void {
 }
 function editChapterItem(): void {
   proxy.$API.default.chapter
-    .updateChapterItem(state.addChapter)
+    .updateChapterItem(state.chapterInfo)
     .then((res: any) => {
       console.log(res);
       getChapterList(state.routeParams);
@@ -228,7 +259,7 @@ function editChapterItem(): void {
 }
 function addChapter(): void {
   proxy.$API.default.chapter
-    .addChapterItem(state.addChapter)
+    .addChapterItem(state.chapterInfo)
     .then((res: any) => {
       console.log(res);
       if (res.status == 200) {
@@ -236,6 +267,15 @@ function addChapter(): void {
         dialogVisible.value = false;
       }
     });
+}
+const handleUploadSuccess = ( response:any, uploadFile:any) => {
+  console.log(response);
+  
+  console.log(uploadFile);
+  const { code, msg, data } = response
+  if(code == '0'){
+    state.chapterInfo.videoUrl = data
+  }
 }
 function toCourseList() {
   router.push("/courseList");
