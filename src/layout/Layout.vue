@@ -42,6 +42,10 @@
           <el-icon><List /></el-icon>
           <span>班级管理</span>
         </el-menu-item>
+        <el-menu-item index="5" @click="gotoUser">
+          <el-icon><UserFilled /></el-icon>
+          <span>用户管理</span>
+        </el-menu-item>
       </el-menu>
     </div>
     <div class="main">
@@ -72,6 +76,9 @@ import router from '@/router';
     }
     const gotoClass = () => {
       router.push('/class')
+    }
+    const gotoUser = () => {
+      router.push('/user')
     }
 </script>
 <style lang="scss" scoped>

@@ -1,5 +1,5 @@
 <template>
-  <div class="course-list">
+  <div class="teacher-list">
     <!-- <div class="bread-crumb">
         <el-breadcrumb separator="/">
           <el-breadcrumb-item to="/courseList">课程</el-breadcrumb-item>
@@ -26,7 +26,12 @@
         style="width: 100%"
       >
         <el-table-column type="selection" width="55" header-align="center" />
-        <el-table-column property="phone" label="联系电话" align="center" width="150"/>
+        <el-table-column
+          property="phone"
+          label="联系电话"
+          align="center"
+          width="150"
+        />
         <el-table-column
           property="teacherName"
           label="姓名"
@@ -57,7 +62,7 @@
           header-align="center"
           align="center"
         /> -->
-       
+
         <el-table-column header-align="center" align="center" label="操作">
           <template #default="props">
             <el-button
@@ -100,7 +105,10 @@
         style="max-width: 460px"
       >
         <el-form-item label="姓名">
-          <el-input v-model="state.teacherInfo.teacherName" placeholder="姓名" />
+          <el-input
+            v-model="state.teacherInfo.teacherName"
+            placeholder="姓名"
+          />
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="state.teacherInfo.email" placeholder="邮箱" />
@@ -109,7 +117,11 @@
           <el-input v-model="state.teacherInfo.phone" placeholder="电话号码" />
         </el-form-item>
         <el-form-item label="讲师简介">
-          <el-input v-model="state.teacherInfo.introduce" type="textarea" placeholder="讲师简介" />
+          <el-input
+            v-model="state.teacherInfo.introduce"
+            type="textarea"
+            placeholder="讲师简介"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -246,8 +258,8 @@ onMounted(() => {
 </script>
   
   
-  <style lang="scss" scoped>
-.course-list {
+<style lang="scss" scoped>
+.teacher-list {
   overflow: hidden;
   .bread-crumb {
     margin-top: 33px;

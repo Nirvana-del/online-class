@@ -50,7 +50,6 @@
           property="name"
           label="课程名称"
           header-align="center"
-          width="250"
           align="center"
         />
         <el-table-column
@@ -64,7 +63,6 @@
           property="type.name"
           label="课程类型"
           align="center"
-          width="150"
           show-overflow-tooltip
         />
         <el-table-column
@@ -72,10 +70,9 @@
           label="课时"
           header-align="center"
           align="center"
-          width="150"
         >
         </el-table-column>
-        <el-table-column header-align="center" align="center" label="操作">
+        <el-table-column header-align="center" align="center" label="操作" width="350">
           <template #default="props">
             <el-button
               type="default"
@@ -172,7 +169,6 @@
         <el-form-item label="选择讲师：" required>
           <el-select
             v-model="state.courseInfo.teacher.id"
-            :name="state.courseInfo.teacher.teacherName"
             class="m-2"
             placeholder="选择讲师"
             size="default"

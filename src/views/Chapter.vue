@@ -62,7 +62,7 @@
             <el-button
               size="default"
               icon="EditPen"
-              @click="chapterEdit(scope.$index, scope.row)"
+              @click="toEditChapter(scope.$index, scope.row)"
               >编辑</el-button
             >
             <el-popconfirm
@@ -101,10 +101,10 @@
           <el-input
             v-model="state.chapterInfo.videoUrl"
             placeholder="视频地址"
-            style="margin-bottom:10px"
+            style="margin-bottom: 10px"
           />
           <el-upload
-            ref="upload"
+            ref="myUploadVideo"
             class="upload-demo"
             action="/api/common/uploadVideo"
             :limit="1"
@@ -168,6 +168,10 @@ import { getCurrentInstance, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import { Chapter, RouteParams } from "./types/Chapter";
+import { ElMessage } from "element-plus";
+import type { UploadInstance } from "element-plus";
+
+const myUploadVideo = ref<UploadInstance>();
 
 const route = useRoute();
 const dialogVisible = ref(false);
@@ -195,6 +199,8 @@ function handleSizeChange(e: any) {
 }
 const { proxy } = getCurrentInstance() as any;
 onMounted(() => {
+  console.log(myUploadVideo);
+  
   console.log("route:", toRaw(route).query.value);
   state.routeParams = toRaw(route).query.value as unknown as RouteParams;
   getChapterList(state.routeParams);
@@ -220,29 +226,46 @@ function chapterDelete(index: any, row: any) {
   });
   console.log(index, row);
 }
-function chapterEdit(index: any, chapterInfo: any) {
+function toEditChapter(index: any, chapterInfo: any) {
   console.log(chapterInfo);
   state.chapterInfo.id = chapterInfo.id;
   isEdit.value = true;
   dialogVisible.value = true;
   Object.assign(state.chapterInfo, chapterInfo);
+  console.log(state.chapterInfo);
+
   const { courseId } = state.routeParams as RouteParams;
-  state.chapterInfo.course = courseId;
+  if(state.chapterInfo.course){
+    state.chapterInfo.course.id = courseId
+  }
 }
 function toAddChapter() {
   state.chapterInfo.videoUrl = null;
   state.chapterInfo.name = null;
   state.chapterInfo.state = null;
   state.chapterInfo.info = null;
+  // console.log(myUploadVideo);
+
+  // myUploadVideo.value!.clearFiles();
   isEdit.value = false;
   console.log(state.routeParams);
   dialogVisible.value = true;
 
   const { courseId } = state.routeParams as RouteParams;
-  state.chapterInfo.course = courseId;
+  if(state.chapterInfo.course){
+    state.chapterInfo.course.id = courseId
+  }
   console.log("添加章节");
 }
 function buttonConfirm(): void {
+  const obj = state.chapterInfo;
+  if (obj.name == null || obj.videoUrl == null || obj.state == null) {
+    ElMessage({
+      message: "必填项不能为空",
+      type: "warning",
+    });
+    return;
+  }
   if (isEdit.value == true) {
     editChapterItem();
   } else {
@@ -270,15 +293,15 @@ function addChapter(): void {
       }
     });
 }
-const handleUploadSuccess = ( response:any, uploadFile:any) => {
+const handleUploadSuccess = (response: any, uploadFile: any) => {
   console.log(response);
-  
+
   console.log(uploadFile);
-  const { code, msg, data } = response
-  if(code == '0'){
-    state.chapterInfo.videoUrl = data
+  const { code, msg, data } = response;
+  if (code == "0") {
+    state.chapterInfo.videoUrl = data;
   }
-}
+};
 function toCourseList() {
   router.push("/courseList");
 }

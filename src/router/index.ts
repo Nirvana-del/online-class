@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Home from '../views/Home.vue'
-import CourseList from '../views/CourseList.vue';
 import Layout from '@/layout/Layout.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -12,7 +10,7 @@ const routes: Array<RouteRecordRaw> = [
     children:[
       {
         path: '/dataAssess',
-        name: 'dataAssess',
+        name: 'DataAssess',
         component: () => import('@/views/DataAssess.vue'),
       },
       {
@@ -35,12 +33,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Class',
         component: () => import('@/views/Class.vue'),
       },
+      {
+        path: '/user',
+        name: 'User',
+        component: () => import('@/views/User.vue'),
+      }
     ]
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('@/views/Login.vue')
   }
 ]
 

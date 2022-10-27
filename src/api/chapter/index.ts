@@ -20,7 +20,7 @@ export const addChapterItem = (addChapter:any) => {
         method: 'post',
         url: `/section/add`,
         data: {
-            course,
+            course:course.id,
             name,
             state,
             videoUrl,

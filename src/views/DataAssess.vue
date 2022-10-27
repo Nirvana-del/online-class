@@ -57,8 +57,14 @@
       </el-row>
     </div>
     <div class="content">
-      <div id="main" style="width: 700px; height: 500px"></div>
-      <div id="maychar" style="width: 700px; height: 500px"></div>
+      <el-row :gutter="24" justify="space-between">
+        <el-col :span="12">
+          <div id="main" style="width: 500px; height: 500px"></div>
+        </el-col>
+        <el-col :span="12">
+          <div id="maychar" style="width: 500px; height: 500px"></div>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
@@ -99,26 +105,26 @@ const changetype = () => {
   const machart = echarts.init(document.getElementById("maychar"));
   // 设置配置项
   const option = {
-  series: [
-    {
-      type: 'pie',
-      data: [
-        {
-          value: 335,
-          name: '直接访问'
-        },
-        {
-          value: 234,
-          name: '联盟广告'
-        },
-        {
-          value: 1548,
-          name: '搜索引擎'
-        }
-      ]
-    }
-  ]
-};
+    series: [
+      {
+        type: "pie",
+        data: [
+          {
+            value: 335,
+            name: "直接访问",
+          },
+          {
+            value: 234,
+            name: "联盟广告",
+          },
+          {
+            value: 1548,
+            name: "搜索引擎",
+          },
+        ],
+      },
+    ],
+  };
   // 复制
   machart.setOption(option);
   // 根据页面大小自动响应图表大小
@@ -174,9 +180,5 @@ const changetype = () => {
       }
     }
   }
-}
-.content {
-  display: flex;
-  justify-content: space-around;
 }
 </style>

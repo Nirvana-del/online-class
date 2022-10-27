@@ -4,12 +4,12 @@ export interface Type{
   name: string;
 }
 export interface Course {
-    coverUrl: string | null;
+    coverUrl?: string | null;
     id: number | null;
-    introduction:string | null;
-    name: string | null;
-    period: number | null;
+    introduction?:string | null;
+    name?: string | null;
+    period?: number | null;
     type: Type;
-    view:number | null;
+    view?:number | null;
     teacher: Teacher;
   }

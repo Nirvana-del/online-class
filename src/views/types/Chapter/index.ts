@@ -6,7 +6,7 @@ export interface Chapter {
   videoUrl: string | null;
   state: number | null;
   info:string | null;
-  course: number;
+  course: Course;
 }
 
 export interface RouteParams {
