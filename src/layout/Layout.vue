@@ -22,9 +22,13 @@
         <!-- active-text-color="#ffd04b"
         background-color="#545c64"
         text-color="#fff" -->
-        <el-menu-item index="1" @click="gotoCourseList">
+        <el-menu-item index="1" @click="gotoDataAssess">
+          <el-icon><Coin /></el-icon>
+          <span>数据分析</span>
+        </el-menu-item>
+        <el-menu-item index="2" @click="gotoCourseList">
           <el-icon><Menu /></el-icon>
-          <span>课程管理 </span>
+          <span>课程管理</span>
         </el-menu-item>
         <!-- <el-menu-item index="2" @click="gotoCourseList">
           <el-icon><User /></el-icon>
@@ -33,6 +37,10 @@
         <el-menu-item index="3" @click="gotoTeacher">
           <el-icon><Avatar /></el-icon>
           <span>讲师管理</span>
+        </el-menu-item>
+        <el-menu-item index="4" @click="gotoClass">
+          <el-icon><List /></el-icon>
+          <span>班级管理</span>
         </el-menu-item>
       </el-menu>
     </div>
@@ -53,11 +61,17 @@ import router from '@/router';
     const handleClose = (key: string, keyPath: string[]) => {
       console.log(key, keyPath);
     };
-    function gotoCourseList(){
+    const gotoCourseList = () => {
       router.push('/courseList')
+    }
+    const gotoDataAssess = () => {
+      router.push('/dataAssess')
     }
     const gotoTeacher = () => {
       router.push('/teacher')
+    }
+    const gotoClass = () => {
+      router.push('/class')
     }
 </script>
 <style lang="scss" scoped>

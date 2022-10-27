@@ -1,10 +1,9 @@
 export interface Teacher {
-    id: number;
-    email: string;
-    level: number;
-    password: string;
-    phone: number;
-    teacherName: string;
-    username: string;
-  }
-  
+  createTime?: string;
+  email?: string;
+  id: number | null | string;
+  introduce?: string;
+  phone?: string;
+  teacherName: string;
+  updateTime?: string;
+}

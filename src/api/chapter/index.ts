@@ -1,6 +1,6 @@
-import request from '../request';
+import request from '@/utils/axios/request'
 
-export const getChapterList = (courseId, pagination) => {
+export const getChapterList = (courseId:any, pagination:any) => {
     const { currentPage, pageSize } = pagination
     return request({
         method: 'get',
@@ -13,22 +13,24 @@ export const getChapterList = (courseId, pagination) => {
     })
 }
 
-export const addChapterItem = (addChapter) => {
+export const addChapterItem = (addChapter:any) => {
     console.log(addChapter);
-    const { course, name, state } = addChapter
+    const { course, name, state, videoUrl,info } = addChapter
     return request({
         method: 'post',
         url: `/section/add`,
         data: {
             course,
             name,
-            state
+            state,
+            videoUrl,
+            info
         }
     })
 }
 
 // 删除章节
-export const deleteChapterItem = (chapterId) => {
+export const deleteChapterItem = (chapterId:any) => {
     return request({
         method: 'delete',
         url: `/section/delete?id=${chapterId}`
@@ -36,8 +38,8 @@ export const deleteChapterItem = (chapterId) => {
 }
 
 // 更新章节
-export const updateChapterItem = (chapterInfo) => {
-    const { id, course, name, state,videoUrl } = chapterInfo
+export const updateChapterItem = (chapterInfo:any) => {
+    const { id, course, name, state, videoUrl, info } = chapterInfo
     return request({
         method: 'post',
         url: `/section/update`,
@@ -45,8 +47,9 @@ export const updateChapterItem = (chapterInfo) => {
             id,
             name,
             state,
-            course,
-            videoUrl
+            course:course.id,
+            videoUrl,
+            info
         }
     })
 }

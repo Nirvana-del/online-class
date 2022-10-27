@@ -37,13 +37,13 @@
           header-align="center"
           align="center"
         />
-        <!-- <el-table-column
+        <el-table-column
           label="简介"
           prop="info"
           show-overflow-tooltip
           header-align="center"
           align="center"
-        /> -->
+        />
         <el-table-column
           label="当前进度"
           prop="state"
@@ -97,10 +97,11 @@
         :model="state.chapterList"
         style="max-width: 460px"
       >
-        <el-form-item label="视频地址">
+        <el-form-item label="视频地址" required>
           <el-input
             v-model="state.chapterInfo.videoUrl"
             placeholder="视频地址"
+            style="margin-bottom:10px"
           />
           <el-upload
             ref="upload"
@@ -119,7 +120,7 @@
             </template>
           </el-upload>
         </el-form-item>
-        <el-form-item label="章节名">
+        <el-form-item label="章节名" required>
           <el-input v-model="state.chapterInfo.name" placeholder="章节名" />
         </el-form-item>
         <!-- <el-form-item label="课程ID">
@@ -132,20 +133,20 @@
         <el-form-item label="视频地址">
           <el-input v-model="state.chapterInfo.video" placeholder="视频地址" />
         </el-form-item> -->
-        <el-form-item label="当前进度">
+        <el-form-item label="当前进度" required>
           <el-input
             v-model="state.chapterInfo.state"
             placeholder="当前进度"
             type="number"
           />
         </el-form-item>
-        <!-- <el-form-item label="简介">
+        <el-form-item label="简介">
           <el-input
             v-model="state.chapterInfo.info"
             type="textarea"
             placeholder="简介"
           />
-        </el-form-item> -->
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -166,14 +167,14 @@ import { ref, reactive } from "@vue/reactivity";
 import { getCurrentInstance, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
-import { addOrEditChapter, Chapter, RouteParams } from "./types/Chapter";
+import { Chapter, RouteParams } from "./types/Chapter";
 
 const route = useRoute();
 const dialogVisible = ref(false);
 const isEdit = ref(false);
 const state = reactive({
   chapterList: [] as Chapter[],
-  chapterInfo: {} as addOrEditChapter,
+  chapterInfo: {} as Chapter,
   routeParams: {},
 });
 const pagination = reactive({
@@ -229,9 +230,10 @@ function chapterEdit(index: any, chapterInfo: any) {
   state.chapterInfo.course = courseId;
 }
 function toAddChapter() {
-  state.chapterInfo.videoUrl = "";
-  state.chapterInfo.name = "";
-  state.chapterInfo.state = 0;
+  state.chapterInfo.videoUrl = null;
+  state.chapterInfo.name = null;
+  state.chapterInfo.state = null;
+  state.chapterInfo.info = null;
   isEdit.value = false;
   console.log(state.routeParams);
   dialogVisible.value = true;

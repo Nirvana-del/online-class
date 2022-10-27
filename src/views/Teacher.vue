@@ -26,21 +26,7 @@
         style="width: 100%"
       >
         <el-table-column type="selection" width="55" header-align="center" />
-        <el-table-column
-          property="email"
-          label="邮箱"
-          width="120"
-          header-align="center"
-          align="center"
-        />
-        <el-table-column
-          property="level"
-          label="级别"
-          width="120"
-          header-align="center"
-          align="center"
-        />
-        <el-table-column property="phone" label="联系电话" align="center" />
+        <el-table-column property="phone" label="联系电话" align="center" width="150"/>
         <el-table-column
           property="teacherName"
           label="姓名"
@@ -49,6 +35,29 @@
           width="100"
         >
         </el-table-column>
+        <el-table-column
+          property="introduce"
+          label="教师简介"
+          header-align="center"
+          align="center"
+          show-overflow-tooltip
+        >
+        </el-table-column>
+        <el-table-column
+          property="email"
+          label="邮箱"
+          width="200"
+          header-align="center"
+          align="center"
+        />
+        <!-- <el-table-column
+          property="level"
+          label="级别"
+          width="120"
+          header-align="center"
+          align="center"
+        /> -->
+       
         <el-table-column header-align="center" align="center" label="操作">
           <template #default="props">
             <el-button
@@ -90,31 +99,17 @@
         :model="state.teacherList"
         style="max-width: 460px"
       >
-        <el-form-item label="账号">
-          <el-input v-model="state.teacherInfo.username" placeholder="账号" />
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="state.teacherInfo.password" placeholder="密码" />
+        <el-form-item label="姓名">
+          <el-input v-model="state.teacherInfo.teacherName" placeholder="姓名" />
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="state.teacherInfo.email" placeholder="邮箱" />
         </el-form-item>
-        <el-form-item label="级别">
-          <el-input
-            v-model="state.teacherInfo.level"
-            placeholder="级别"
-            type="number"
-          />
+        <el-form-item label="电话号码">
+          <el-input v-model="state.teacherInfo.phone" placeholder="电话号码" />
         </el-form-item>
-        <el-form-item label="联系方式">
-          <el-input v-model="state.teacherInfo.phone" placeholder="联系方式" />
-        </el-form-item>
-
-        <el-form-item label="姓名">
-          <el-input
-            v-model="state.teacherInfo.teacherName"
-            placeholder="姓名"
-          />
+        <el-form-item label="讲师简介">
+          <el-input v-model="state.teacherInfo.introduce" type="textarea" placeholder="讲师简介" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -214,12 +209,10 @@ const addTeacher = (): void => {
 };
 function toAddTeacher() {
   isEdit.value = false;
-  state.teacherInfo.username = "";
-  state.teacherInfo.password = "";
   state.teacherInfo.email = "";
-  state.teacherInfo.level = 0;
-  state.teacherInfo.phone = 0;
+  state.teacherInfo.phone = "";
   state.teacherInfo.teacherName = "";
+  state.teacherInfo.introduce = "";
   console.log(state.teacherInfo);
 
   dialogVisible.value = true;
