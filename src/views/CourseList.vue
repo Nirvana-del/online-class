@@ -14,14 +14,15 @@
         <el-button type="default" icon="DeleteFilled">批量删除</el-button>
       </div>
       <div class="search">
-        <el-input v-model="state.keyWord" placeholder="请输入内容" />
-        <el-button type="default" icon="Search"></el-button>
+        <el-input v-model="state.keyWord" placeholder="请输入课程名称" />
+        <el-button type="default" icon="Search" @click="searchByCourseName"></el-button>
       </div>
     </div>
     <div class="table">
       <el-table
         ref="multipleTableRef"
         :data="state.courseList"
+        stripe
         border
         style="width: 100%"
       >
@@ -63,16 +64,36 @@
           property="type.name"
           label="课程类型"
           align="center"
+          :filters="[
+        { text: '公开课', value: 1 },
+        { text: '定制课', value: 2 },
+        { text: '专家课', value: 3 },
+      ]"
+      :filter-method="filterHandler"
           show-overflow-tooltip
         />
         <el-table-column
           property="period"
           label="课时"
+          sortable
           header-align="center"
           align="center"
         >
         </el-table-column>
-        <el-table-column header-align="center" align="center" label="操作" width="350">
+        <el-table-column
+          property="view"
+          label="观看人数"
+          sortable
+          header-align="center"
+          align="center"
+        >
+        </el-table-column>
+        <el-table-column
+          header-align="center"
+          align="center"
+          label="操作"
+          width="350"
+        >
           <template #default="props">
             <el-button
               type="default"
@@ -119,7 +140,12 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="课程信息" width="30%">
+    <el-dialog
+      v-model="dialogVisible"
+      title="课程信息"
+      width="30%"
+      :lock-scroll="false"
+    >
       <el-form
         label-width="100px"
         :model="state.courseInfo"
@@ -148,7 +174,8 @@
             placeholder="填写课程名称"
           />
         </el-form-item>
-        <el-form-item label="课程类型：" required>
+        <el-form-item label="课程类型："
+        required>
           <el-select
             v-model="state.courseInfo.type.id"
             class="m-2"
@@ -188,6 +215,14 @@
           <el-input
             v-model="state.courseInfo.period"
             placeholder="课时"
+            max="48"
+            type="number"
+          />
+        </el-form-item>
+        <el-form-item label="观看人数：" required>
+          <el-input
+            v-model="state.courseInfo.view"
+            placeholder="观看人数："
             type="number"
           />
         </el-form-item>
@@ -215,6 +250,7 @@ import { ref, getCurrentInstance, onMounted, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import { Course } from "./types/Course/index";
 import { Teacher } from "./types/Teacher/index";
+import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 // 默认空图片
 const emptyImg = require("@/assets/empty.png");
 // 弹出框显示隐藏
@@ -240,6 +276,33 @@ const pagination = reactive({
 onMounted(() => {
   getCourseList();
 });
+
+// 筛选课程类型
+const filterHandler = (
+  value: string,
+  row: Course,
+  column: TableColumnCtx<Course>
+) => {
+  console.log(column);
+  
+  const property = column['property']
+  return row[property] === value
+}
+
+const searchByCourseName = () => {
+  proxy.$API.default.course.getCourseListByKeyWord(pagination,state.keyWord).then(
+    (res: any) => {
+      console.log(res.data);
+      state.courseList = res.data.data.courses;
+      pagination.total = res.data.data.totalItems;
+      dialogVisible.value = false;
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error(err.message);
+    }
+  );
+}
 
 // 获取课程ID名称集合
 const getCourseIdName = (val: Boolean): void => {
@@ -344,19 +407,27 @@ function toEditCourse(courseItem: Course) {
   console.log(courseItem);
   isEdit.value = true;
   Object.assign(state.courseInfo, courseItem);
-  // state.courseInfo.teacher.id = courseItem.teacher.teacherName;
-  // state.courseInfo.type.id = courseItem.type.name;
-  console.log(state.courseInfo);
+  // state.courseInfo.teacher.id = null;
+  // state.courseInfo.type.id = null;
   dialogVisible.value = true;
 }
 // 弹出框确定按钮
 function buttonConfirm(): void {
-  const obj = state.courseInfo
-  if(obj.name == null || obj.introduction == null ||obj.period == null){
+  const obj = state.courseInfo;
+  if (obj.name == null || obj.introduction == null || obj.period == null) {
     ElMessage({
-    message: '必填项不能为空',
-    type: 'warning',
-  })
+      message: "必填项不能为空",
+      type: "warning",
+    });
+    return;
+  }
+  console.log(obj.period);
+  
+  if (obj.period! > 48) {
+    ElMessage({
+      message: "课时",
+      type: "warning",
+    });
     return
   }
   if (isEdit.value == true) {

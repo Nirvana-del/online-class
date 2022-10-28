@@ -2,10 +2,20 @@ import request from '@/utils/axios/request'
 
 // 获取班级列表
 export const reqGetClassList = (pagination: any) => {
-    const { currentPage, pageSize } = pagination
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize
+        }
+    }else{
+         params = {}
+    }
     return request({
         method: 'get',
-        url: `/grade/findAll?page=${currentPage - 1}&size=${pageSize}`
+        url: `/grade/findAll`,
+        params
     })
 }
 
@@ -19,7 +29,7 @@ export const reqAddClassesItem = (classesItem: any) => {
             name, 
             atmosphere, 
             coverUrl, 
-            headteacher
+            headteacher: headteacher.id
         }
     })
 }

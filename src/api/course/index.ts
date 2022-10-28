@@ -2,10 +2,58 @@ import request from '@/utils/axios/request';
 
 // 获取课程列表
 export const getCourseList = (pagination:any) => {
-    const { currentPage, pageSize } = pagination
+    console.log(pagination);
+    
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize
+        }
+    }else{
+         params = {}
+    }
+   
     return request({
         method: 'get',
-        url: `/course/findAll?page=${currentPage-1}&size=${pageSize}`
+        url: `/course/findAll`,
+        params
+    })
+}
+
+// 根据课程类型查找课程列表
+export const getCourseListByType = (type:any) => {
+    const { typeId } = type
+    return request({
+        method: 'get',
+        url: `/course/findAll`,
+        params:{
+            typeId
+        }
+    })
+}
+
+// 根据课程关键字查找课程列表
+export const getCourseListByKeyWord = (pagination:any,keyWord:any) => {
+    console.log(keyWord);
+    
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize,
+            name: keyWord
+        }
+    }else{
+         params = {}
+    }
+   
+    return request({
+        method: 'get',
+        url: `/course/findAll`,
+        params
     })
 }
 
@@ -30,10 +78,8 @@ export const deleteCourseItem = (courseId:any) => {
 
 // 修改课程
 export const updateCourseItem = (courseItem:any) => {
-    const { id, name, type, coverUrl, period, teacher } = courseItem
-    console.log(courseItem);
+    const { id, name, type, coverUrl, period, teacher, introduction, view } = courseItem
     
-    // if(typeof(Number(teacher.id)) == number)
     return request({
         method: 'post',
         url: `/course/update`,
@@ -43,13 +89,16 @@ export const updateCourseItem = (courseItem:any) => {
             name,
             type:type.id,
             period,
-            teacherId: teacher.id
+            teacher: teacher.id,
+            introduction,
+            view
         }
     })
 }
 
 // 新增课程
 export const addCourseItem = (courseItem:any) => {
+    
     const { name, type, coverUrl, period, teacher, introduction } = courseItem
 
     return request({

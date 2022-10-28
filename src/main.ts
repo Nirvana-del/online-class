@@ -15,8 +15,6 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 const API:any = require('@/api/index.ts') 
 
-console.log(API);
-
 app.config.globalProperties.$API = API;
 
 app.use(store).use(router).use(ElementPlus).mount('#app')

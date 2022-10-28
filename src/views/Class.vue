@@ -1,11 +1,11 @@
 <template>
   <div class="teacher-list">
-    <!-- <div class="bread-crumb">
+    <div class="bread-crumb">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item to="/courseList">课程</el-breadcrumb-item>
-            <el-breadcrumb-item>课程管理</el-breadcrumb-item>
+            <el-breadcrumb-item to="/class">班级</el-breadcrumb-item>
+            <el-breadcrumb-item>班级管理</el-breadcrumb-item>
           </el-breadcrumb>
-        </div> -->
+        </div>
     <div class="top-info">
       <div class="operation">
         <el-button type="default" icon="Plus" @click="toAddClassess"
@@ -47,14 +47,14 @@
         />
         <el-table-column
           property="atmosphere"
-          label="气氛"
+          label="班训"
           header-align="center"
           align="center"
           width="100"
         >
         </el-table-column>
         <el-table-column
-          property="headteacher"
+          property="headteacher.nickName"
           label="班主任"
           header-align="center"
           align="center"
@@ -67,7 +67,7 @@
               type="default"
               size="default"
               icon="EditPen"
-              @click="toEditTeacher(props.row)"
+              @click="toEditClass(props.row)"
               >编辑</el-button
             >
             <el-popconfirm
@@ -96,7 +96,7 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="班级信息" width="30%">
+    <el-dialog v-model="dialogVisible" title="班级信息" width="30%" :lock-scroll="false">
       <el-form
         label-width="100px"
         :model="state.classesList"
@@ -119,15 +119,15 @@
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
-        <el-form-item label="班级名称">
+        <el-form-item label="班级名称：">
           <el-input v-model="state.classInfo.name" placeholder="班级名称" />
         </el-form-item>
-        <el-form-item label="气氛">
-          <el-input v-model="state.classInfo.atmosphere" placeholder="气氛" />
+        <el-form-item label="班训:">
+          <el-input v-model="state.classInfo.atmosphere" placeholder="班训" />
         </el-form-item>
-        <el-form-item label="班主任">
+        <el-form-item label="班主任:">
             <el-select
-            v-model="state.classInfo.headteacher"
+            v-model="state.classInfo.headteacher.id"
             class="m-2"
             placeholder="选择班主任"
             size="default"
@@ -248,8 +248,8 @@ const getClasserList = (): void => {
     console.log(res.data);
     const { code, msg, data } = res.data;
     if (code == "0") {
-      state.classesList = data;
-    //   pagination.total = data.totalItems;
+      state.classesList = data.grades;
+      pagination.total = data.totalItems;
       dialogVisible.value = false;
     }
   });
@@ -274,13 +274,16 @@ const toAddClassess = () =>{
   state.classInfo.name = null;
   state.classInfo.atmosphere = null;
   state.classInfo.coverUrl = null;
-  state.classInfo.headteacher = null;
+  state.classInfo.headteacher = {
+    id: null,
+    nickName: "",
+  }
   console.log(state.classInfo);
 
   dialogVisible.value = true;
 }
 // 点击编辑班级按钮
-const toEditTeacher = (classInfo: Classes) => {
+const toEditClass = (classInfo: Classes) => {
   console.log(classInfo);
   isEdit.value = true;
   Object.assign(state.classInfo, classInfo);

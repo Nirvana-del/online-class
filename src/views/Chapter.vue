@@ -91,7 +91,7 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="课程信息" width="30%">
+    <el-dialog v-model="dialogVisible" title="课程信息" width="30%" :lock-scroll="false">
       <el-form
         label-width="100px"
         :model="state.chapterList"
@@ -133,13 +133,13 @@
         <el-form-item label="视频地址">
           <el-input v-model="state.chapterInfo.video" placeholder="视频地址" />
         </el-form-item> -->
-        <el-form-item label="当前进度" required>
+        <!-- <el-form-item label="当前进度" required>
           <el-input
             v-model="state.chapterInfo.state"
             placeholder="当前进度"
             type="number"
           />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="简介">
           <el-input
             v-model="state.chapterInfo.info"
@@ -252,14 +252,14 @@ function toAddChapter() {
   dialogVisible.value = true;
 
   const { courseId } = state.routeParams as RouteParams;
-  if(state.chapterInfo.course){
-    state.chapterInfo.course.id = courseId
+    state.chapterInfo.course = {
+      id: courseId
   }
   console.log("添加章节");
 }
 function buttonConfirm(): void {
   const obj = state.chapterInfo;
-  if (obj.name == null || obj.videoUrl == null || obj.state == null) {
+  if (obj.name == null || obj.videoUrl == null) {
     ElMessage({
       message: "必填项不能为空",
       type: "warning",

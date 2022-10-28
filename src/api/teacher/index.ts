@@ -2,14 +2,40 @@ import request from '@/utils/axios/request';
 
 // 获取教师列表
 export const getTeacherList = (pagination:any) => {
-    const { currentPage, pageSize } = pagination
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize
+        }
+    }else{
+         params = {}
+    }
     return request({
         method: 'get',
         url: `teacher/findAll`,
-        params: {
-            page: currentPage - 1,
-            size: pageSize
+        params
+    })
+}
+
+// 根据关键词获取教师列表
+export const getTeacherListByKeyWord = (pagination:any,keyWord:any) => {
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize,
+            name: keyWord
         }
+    }else{
+         params = {}
+    }
+    return request({
+        method: 'get',
+        url: `teacher/findAll`,
+        params
     })
 }
 // 获取所有教师的id和姓名

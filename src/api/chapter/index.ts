@@ -8,7 +8,8 @@ export const getChapterList = (courseId:any, pagination:any) => {
         params: {
             courseId,
             page: currentPage - 1,
-            size: pageSize
+            size: pageSize,
+            sort: 'id,asc'
         }
     })
 }
