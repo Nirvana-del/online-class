@@ -81,3 +81,18 @@ export const reqDeleteUser = (userId:any) => {
         url: `user/delete?id=${userId}`,
     })
 }
+
+// 管理员登录
+export const reqAdminLogin = (adminInfo:any) => {
+    const { userName, pwd } = adminInfo
+    console.log(adminInfo);
+    
+    return request({
+        method: 'post',
+        url: '/login',
+        data:{
+            username: userName,
+            password: pwd
+        }
+    })
+}

@@ -1,15 +1,14 @@
 import request from '@/utils/axios/request';
 
 // 获取课程列表
-export const getCourseList = (pagination:any) => {
-    console.log(pagination);
-    
+export const getCourseList = (pagination:any,sort:any) => {
     let params = {}
     if(pagination !== undefined){
         const { currentPage, pageSize } = pagination
          params = {
             page: currentPage-1,
-            size: pageSize
+            size: pageSize,
+            sort
         }
     }else{
          params = {}
@@ -19,18 +18,6 @@ export const getCourseList = (pagination:any) => {
         method: 'get',
         url: `/course/findAll`,
         params
-    })
-}
-
-// 根据课程类型查找课程列表
-export const getCourseListByType = (type:any) => {
-    const { typeId } = type
-    return request({
-        method: 'get',
-        url: `/course/findAll`,
-        params:{
-            typeId
-        }
     })
 }
 

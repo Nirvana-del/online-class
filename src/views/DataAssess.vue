@@ -3,7 +3,7 @@
     <div class="top-info">
       <el-row :gutter="20">
         <el-col :span="6">
-          <router-link to="/courseList" style="text-decoration: none;">
+          <router-link to="/home/courseList" style="text-decoration: none;">
           <el-card class="courses">
             <div class="items">
               <div class="left">
@@ -18,7 +18,7 @@
         </router-link></el-col
         >
         <el-col :span="6">
-          <router-link to="/class" style="text-decoration: none;">
+          <router-link to="/home/class" style="text-decoration: none;">
           <el-card class="classes">
             <div class="items">
               <div class="left">
@@ -33,7 +33,7 @@
           </router-link></el-col
         >
         <el-col :span="6">
-          <router-link to="/user" style="text-decoration: none;">
+          <router-link to="/home/user" style="text-decoration: none;">
 
           <el-card class="students">
             <div class="items">
@@ -50,7 +50,7 @@
           </el-col
         >
         <el-col :span="6">
-          <router-link to="/teacher" style="text-decoration: none;">
+          <router-link to="/home/teacher" style="text-decoration: none;">
 
           <el-card class="teachers">
             <div class="items">
@@ -84,7 +84,7 @@
 <script lang="ts" setup>
 import { number } from "echarts";
 import { ElMessage } from "element-plus";
-import { onMounted, inject, reactive, getCurrentInstance } from "vue"; // 主要
+import { onMounted, inject, reactive, getCurrentInstance, onUpdated } from "vue"; // 主要
 import { Course } from "./types/Course";
 onMounted(() => {
   change(columnOption);
@@ -93,9 +93,10 @@ onMounted(() => {
   getTeachersTotal();
   getUseresTotal();
   getClassesTotal();
-  getCourseListByType(1);
-  getCourseListByType(2);
-  getCourseListByType(3);
+  // getCourseListByType(1);
+  // getCourseListByType(2);
+  // getCourseListByType(3);
+  getCourseTypeList();
 });
 const { proxy } = getCurrentInstance() as any;
 
@@ -108,6 +109,7 @@ const state = reactive({
   publicTotal: 0,
   professionalTotal: 0,
   customizedTotal: 0,
+  courseTypeList: []
 });
 const columnOption = {
   title: {
@@ -195,7 +197,7 @@ const pieOption = {
   },
   series: [
     {
-      name: "课程人数",
+      name: "课程门数",
       type: "pie",
       data: [
         {
@@ -213,7 +215,7 @@ const pieOption = {
       ],
       tooltip: {
         valueFormatter: function (value: number) {
-          return value + " 人";
+          return value + " 门";
         },
       },
     },
@@ -222,10 +224,10 @@ const pieOption = {
 // 获取课程总数
 const getCoursesTotal = () => {
   proxy.$API.default.course
-    .getCourseList({ currentPage: 1, pageSize: 10 })
+    .getCourseList({ currentPage:1, pageSize:10 },'view,desc')
     .then(
       (res: any) => {
-        console.log(res.data);
+        console.log('课程',res.data);
         state.courseList = res.data.data.courses;
         const xAxisArr = state.courseList.map((item) => item.name);
         const seriesArr = state.courseList.map((item) => item.view);
@@ -295,7 +297,7 @@ const getCourseListByType = (typeId: number) => {
         case 3:
           pieOption.series[0].data[2].value = res.data.data.totalItems;
       }
-      pieOption && changetype(pieOption);
+      
     },
     (err: any) => {
       console.log(err);
@@ -303,7 +305,23 @@ const getCourseListByType = (typeId: number) => {
     }
   );
 };
-
+// 获取
+const getCourseTypeList = () => {
+  proxy.$API.default.type.getCourseTypeList().then(
+    (res: any) => {
+      console.log(res.data);
+      state.courseTypeList = res.data.data.types
+      state.courseTypeList.forEach((item,index) => {
+        pieOption.series[0].data[index].value = item.courses.length
+      })
+      changetype(pieOption);
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error(err.message);
+    }
+  );
+}
 let echarts = inject("echarts"); // 主要
 // 基本柱形图
 const change = (option: any) => {
@@ -316,10 +334,6 @@ const change = (option: any) => {
 };
 // 饼图
 const changetype = (option: any) => {
-  console.log(state.publicTotal);
-  console.log(state.professionalTotal);
-  console.log(state.customizedTotal);
-
   // 获取组件实例
   const machart = echarts.init(document.getElementById("maychar"));
   // 设置配置项

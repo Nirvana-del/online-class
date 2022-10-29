@@ -2,7 +2,7 @@
   <div class="course-list">
     <div class="bread-crumb">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item to="/courseList">课程</el-breadcrumb-item>
+        <el-breadcrumb-item to="/home/courseList">课程</el-breadcrumb-item>
         <el-breadcrumb-item>课程管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -91,14 +91,14 @@
           align="center"
         >
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           property="view"
           label="观看人数"
           sortable
           header-align="center"
           align="center"
         >
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column
           header-align="center"
           align="center"
@@ -229,13 +229,13 @@
             type="number"
           />
         </el-form-item>
-        <el-form-item label="观看人数：" required>
+        <!-- <el-form-item label="观看人数：" required>
           <el-input
             v-model="state.courseInfo.view"
             placeholder="观看人数："
             type="number"
           />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="课程简介：">
           <el-input
             v-model="state.courseInfo.introduction"
@@ -294,10 +294,10 @@ const filterHandler = (
   row: Course,
   column: TableColumnCtx<Course>
 ) => {
-  console.log(column);
+  console.log(value,row,column);
 
   const property = column["property"];
-  return row[property] === value;
+  return row.type.id === value;
 };
 
 const searchByCourseName = () => {
@@ -447,7 +447,7 @@ function buttonConfirm(): void {
 
   if (obj.period! > 48) {
     ElMessage({
-      message: "课时",
+      message: "课时最大为48h",
       type: "warning",
     });
     return;
@@ -483,7 +483,7 @@ const beforeFaceImgUpload = (rawFile: any) => {
 };
 // 进入章节管理
 function gotoChapter(courseId: any) {
-  router.push("/chapterList?courseId=" + courseId);
+  router.push("/home/chapterList?courseId=" + courseId);
 }
 // 改变页数
 function handleCurrentChange(e: any) {

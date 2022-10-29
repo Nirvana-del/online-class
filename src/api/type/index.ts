@@ -11,3 +11,11 @@ export const getCourseListByType = (type:any) => {
         }
     })
 }
+
+// 查找课程类型列表
+export const getCourseTypeList = () => {
+    return request({
+        method: 'get',
+        url: `/type/findAll`
+    })
+}

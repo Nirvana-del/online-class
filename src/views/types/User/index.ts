@@ -9,5 +9,5 @@ export interface User{
     password?: string;
     phone?: string | null;
     username?: string;
-    grades?: Classes[];
+    grades?: number[];
 }

@@ -2,7 +2,7 @@
   <div class="chapter">
     <div class="bread-crumb">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item to="/courseList">课程</el-breadcrumb-item>
+        <el-breadcrumb-item to="/home/courseList">课程</el-breadcrumb-item>
         <el-breadcrumb-item>章节管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -355,7 +355,7 @@ const handleUploadSuccess = (response: any, uploadFile: any) => {
   }
 };
 function toCourseList() {
-  router.push("/courseList");
+  router.push("/home/courseList");
 }
 const gotoVideo = (e: any) => {
   console.log(e);

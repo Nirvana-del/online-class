@@ -2,7 +2,7 @@
   <div class="teacher-list">
     <div class="bread-crumb">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item to="/class">班级</el-breadcrumb-item>
+        <el-breadcrumb-item to="/home/class">班级</el-breadcrumb-item>
         <el-breadcrumb-item>班级管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -11,7 +11,7 @@
         <el-button type="default" icon="Plus" @click="toAddClassess" 
           >添加班级</el-button
         >
-        <el-button type="default" icon="DeleteFilled">批量删除</el-button>
+        <!-- <el-button type="default" icon="DeleteFilled">批量删除</el-button> -->
       </div>
       <div class="search">
         <el-button

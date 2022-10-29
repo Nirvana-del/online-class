@@ -46,6 +46,10 @@
           <el-icon><UserFilled /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item index="6" @click="logOut">
+          <el-icon><Close /></el-icon>
+          <span>退出登录</span>
+        </el-menu-item>
       </el-menu>
     </div>
     <div class="main">
@@ -57,7 +61,8 @@
   <script lang="ts" setup>
 import { ref } from "vue";
 import router from '@/router';
-
+import { useStore } from 'vuex';
+const store = useStore()
     const isCollapse = ref(false);
     const handleOpen = (key: string, keyPath: string[]) => {
       console.log(key, keyPath);
@@ -66,19 +71,22 @@ import router from '@/router';
       console.log(key, keyPath);
     };
     const gotoCourseList = () => {
-      router.push('/courseList')
+      router.push('/home/courseList')
     }
     const gotoDataAssess = () => {
-      router.push('/dataAssess')
+      router.push('/home/dataAssess')
     }
     const gotoTeacher = () => {
-      router.push('/teacher')
+      router.push('/home/teacher')
     }
     const gotoClass = () => {
-      router.push('/class')
+      router.push('/home/class')
     }
     const gotoUser = () => {
-      router.push('/user')
+      router.push('/home/user')
+    }
+    const logOut = () => {
+      store.commit('clearUserInfo')
     }
 </script>
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="course-list">
     <div class="bread-crumb">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item to="/courseList">用户</el-breadcrumb-item>
+        <el-breadcrumb-item to="/home/courseList">用户</el-breadcrumb-item>
         <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -11,15 +11,20 @@
         <el-button type="default" icon="Plus" @click="toAddUser"
           >添加用户</el-button
         >
-        <el-button type="default" icon="DeleteFilled">批量删除</el-button>
+        <!-- <el-button type="default" icon="DeleteFilled">批量删除</el-button> -->
       </div>
       <div class="search">
-        <el-button type="primary" icon="Search" 
-        style="margin-right: 10px"
-        @click="searchByUserName"
-        >搜索</el-button>
-        <el-input v-model="state.keyWord" placeholder="请输入用户姓名" 
-        @keyup.enter="searchByUserName"
+        <el-button
+          type="primary"
+          icon="Search"
+          style="margin-right: 10px"
+          @click="searchByUserName"
+          >搜索</el-button
+        >
+        <el-input
+          v-model="state.keyWord"
+          placeholder="请输入用户姓名"
+          @keyup.enter="searchByUserName"
         />
       </div>
     </div>
@@ -27,6 +32,7 @@
       <el-table
         ref="multipleTableRef"
         :data="state.userList"
+        v-loading="state.tableLoading"
         border
         style="width: 100%"
       >
@@ -166,13 +172,10 @@
         <el-form-item label="所属班级" required>
           <el-select
             v-model="state.userInfo.grades"
-            class="m-2"
+            multiple
             placeholder="选择班级"
-            size="default"
-            value-key="item.id"
             :loading="state.classesLoading"
             loading-text="加载中..."
-            multiple
             @visible-change="getClassesIdName"
           >
             <el-option
@@ -225,7 +228,7 @@ const state = reactive({
   // teacherList: [] as Teacher[],
   // courseTypeList: [] as Course[],
   keyWord: "",
-  teacherLoading: false,
+  tableLoading: false,
   courseTypeLoading: false,
   classesLoading: false,
 });
@@ -240,7 +243,7 @@ onMounted(() => {
   getUserList();
 });
 
-const getClassesIdName = () => {
+const getClassesIdName = async () => {
   console.log("获取班级信息");
   state.classesLoading = true;
   proxy.$API.default.classes.reqGetClassList(pagination).then((res: any) => {
@@ -285,15 +288,18 @@ function editUserItem(): void {
 }
 // 获取用户列表
 function getUserList(): void {
+  state.tableLoading = true;
   proxy.$API.default.user.reqGetUserList(pagination).then(
     (res: any) => {
       console.log(res.data);
       state.userList = res.data.data.users;
       pagination.total = res.data.data.totalItems;
+      state.tableLoading = false;
       dialogVisible.value = false;
     },
     (err: any) => {
       console.log(err);
+      state.tableLoading = false;
       ElMessage.error(err.message);
     }
   );
@@ -313,12 +319,12 @@ function toAddUser() {
   dialogVisible.value = true;
 }
 // 点击编辑课程按钮
-function toEditUser(courseItem: User) {
-  getClassesIdName()
+const toEditUser =  async (courseItem: any) => {
+  await getClassesIdName();
   console.log(courseItem);
   isEdit.value = true;
   Object.assign(state.userInfo, courseItem);
-
+  state.userInfo.grades = courseItem.grades!.map(item => item.id)
   // state.userInfo.teacher.id = courseItem.teacher.teacherName;
   // state.userInfo.type.id = courseItem.type.name;
   console.log(state.userInfo);
@@ -371,22 +377,27 @@ const beforeFaceImgUpload = (rawFile: any) => {
   }
   return true;
 };
-// 
-const searchByUserName = (keyWord:any) => {
-  proxy.$API.default.user.reqGetUserListByKeyWord(pagination,state.keyWord).then(
-    (res: any) => {
-      console.log(res.data);
-      state.userList = res.data.data.users;
-      pagination.total = res.data.data.totalItems;
-      dialogVisible.value = false;
-    },
-    (err: any) => {
-      console.log(err);
-      ElMessage.error(err.message);
-    }
-  );
+//
+const searchByUserName = (keyWord: any) => {
+  state.tableLoading = true;
 
-}
+  proxy.$API.default.user
+    .reqGetUserListByKeyWord(pagination, state.keyWord)
+    .then(
+      (res: any) => {
+        console.log(res.data);
+        state.userList = res.data.data.users;
+        pagination.total = res.data.data.totalItems;
+        dialogVisible.value = false;
+        state.tableLoading = false;
+      },
+      (err: any) => {
+        console.log(err);
+        ElMessage.error(err.message);
+        state.tableLoading = false;
+      }
+    );
+};
 // 进入章节管理
 function gotoChapter(courseId: any) {
   router.push("/chapterList?courseId=" + courseId);
