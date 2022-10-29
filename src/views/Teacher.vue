@@ -1,11 +1,11 @@
 <template>
   <div class="teacher-list">
     <div class="bread-crumb">
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item to="/teacher">讲师</el-breadcrumb-item>
-          <el-breadcrumb-item>讲师管理</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item to="/teacher">讲师</el-breadcrumb-item>
+        <el-breadcrumb-item>讲师管理</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
     <div class="top-info">
       <div class="operation">
         <el-button type="default" icon="Plus" @click="toAddTeacher"
@@ -14,15 +14,26 @@
         <el-button type="default" icon="DeleteFilled">批量删除</el-button>
       </div>
       <div class="search">
-        <el-input v-model="state.keyWord" placeholder="请输入内容" />
-        <el-button type="default" icon="Search" @click="searchByTeacherName"></el-button>
+        <el-button
+          type="primary"
+          icon="Search"
+          @click="searchByTeacherName"
+          style="margin-right: 10px"
+          >搜索</el-button
+        >
+        <el-input
+          v-model="state.keyWord"
+          placeholder="请输入老师名字"
+          @keyup.enter="searchByTeacherName"
+        />
       </div>
     </div>
     <div class="table">
       <el-table
         ref="multipleTableRef"
         :data="state.teacherList"
-        stripe 
+        v-loading="state.tableLoading"
+        stripe
         border
         style="width: 100%"
       >
@@ -99,22 +110,27 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="课程信息" width="30%" :lock-scroll="false">
+    <el-dialog
+      v-model="dialogVisible"
+      title="教师信息"
+      width="30%"
+      :lock-scroll="false"
+    >
       <el-form
         label-width="100px"
         :model="state.teacherList"
         style="max-width: 460px"
       >
-        <el-form-item label="姓名">
+        <el-form-item label="姓名" required>
           <el-input
             v-model="state.teacherInfo.teacherName"
             placeholder="姓名"
           />
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" required>
           <el-input v-model="state.teacherInfo.email" placeholder="邮箱" />
         </el-form-item>
-        <el-form-item label="电话号码">
+        <el-form-item label="电话号码" required>
           <el-input v-model="state.teacherInfo.phone" placeholder="电话号码" />
         </el-form-item>
         <el-form-item label="讲师简介">
@@ -147,6 +163,7 @@ const state = reactive({
   teacherList: [] as Teacher[],
   teacherInfo: {} as Teacher,
   keyWord: "",
+  tableLoading: false,
 });
 const pagination = reactive({
   currentPage: 1,
@@ -167,16 +184,25 @@ function handleSizeChange(e: any) {
 }
 function getTeacherList(): void {
   console.log(proxy.$API.default);
+  state.tableLoading = true;
 
-  proxy.$API.default.teacher.getTeacherList(pagination).then((res: any) => {
-    console.log(res.data);
-    const { code, msg, data } = res.data;
-    if (code == "0") {
-      state.teacherList = data.teachers;
-      pagination.total = data.totalItems;
-      dialogVisible.value = false;
+  proxy.$API.default.teacher.getTeacherList(pagination).then(
+    (res: any) => {
+      console.log(res.data);
+      state.tableLoading = false;
+
+      const { code, msg, data } = res.data;
+      if (code == "0") {
+        state.teacherList = data.teachers;
+        pagination.total = data.totalItems;
+        dialogVisible.value = false;
+      }
+    },
+    (err: any) => {
+      ElMessage.error(err.message);
+      state.tableLoading = false;
     }
-  });
+  );
 }
 function deleteTeacher(row: Teacher): void {
   console.log(row);
@@ -189,6 +215,14 @@ function deleteTeacher(row: Teacher): void {
   });
 }
 function buttonConfirm(): void {
+  let obj = state.teacherInfo
+  if(obj.teacherName == null || obj.email == null  || obj.phone == null){
+    ElMessage({
+      message: "必填项不能为空",
+      type: "warning",
+    });
+    return
+  }
   if (isEdit.value == true) {
     editTeacherItem();
   } else {
@@ -223,10 +257,10 @@ const addTeacher = (): void => {
 };
 function toAddTeacher() {
   isEdit.value = false;
-  state.teacherInfo.email = "";
-  state.teacherInfo.phone = "";
-  state.teacherInfo.teacherName = "";
-  state.teacherInfo.introduce = "";
+  state.teacherInfo.email = null
+  state.teacherInfo.phone = null
+  state.teacherInfo.teacherName = null
+  state.teacherInfo.introduce = null
   console.log(state.teacherInfo);
 
   dialogVisible.value = true;
@@ -240,19 +274,24 @@ function toEditTeacher(teacherInfo: Teacher) {
 }
 
 const searchByTeacherName = () => {
-  proxy.$API.default.teacher.getTeacherListByKeyWord(pagination,state.keyWord).then(
-    (res: any) => {
-      console.log(res.data);
-      state.teacherList = res.data.data.courses;
-      pagination.total = res.data.data.totalItems;
-      dialogVisible.value = false;
-    },
-    (err: any) => {
-      console.log(err);
-      ElMessage.error(err.message);
-    }
-  );
-}
+  state.tableLoading = true;
+  proxy.$API.default.teacher
+    .getTeacherListByKeyWord(pagination, state.keyWord)
+    .then(
+      (res: any) => {
+        console.log(res.data);
+        state.teacherList = res.data.data.teachers;
+        pagination.total = res.data.data.totalItems;
+        dialogVisible.value = false;
+        state.tableLoading = false;
+      },
+      (err: any) => {
+        console.log(err);
+        state.tableLoading = false;
+        ElMessage.error(err.message);
+      }
+    );
+};
 function dateFormat(time: string): string {
   var data = new Date(time); //获取年
   var y = data.getFullYear(); //获取月

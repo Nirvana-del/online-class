@@ -3,6 +3,7 @@
     <div class="top-info">
       <el-row :gutter="20">
         <el-col :span="6">
+          <router-link to="/courseList" style="text-decoration: none;">
           <el-card class="courses">
             <div class="items">
               <div class="left">
@@ -13,9 +14,11 @@
                 <span class="type">courses</span>
               </div>
             </div>
-          </el-card></el-col
+          </el-card>
+        </router-link></el-col
         >
         <el-col :span="6">
+          <router-link to="/class" style="text-decoration: none;">
           <el-card class="classes">
             <div class="items">
               <div class="left">
@@ -26,9 +29,12 @@
                 <span class="type">classes</span>
               </div>
             </div>
-          </el-card></el-col
+          </el-card>
+          </router-link></el-col
         >
         <el-col :span="6">
+          <router-link to="/user" style="text-decoration: none;">
+
           <el-card class="students">
             <div class="items">
               <div class="left">
@@ -39,9 +45,13 @@
                 <span class="type">users</span>
               </div>
             </div>
-          </el-card></el-col
+          </el-card>
+          </router-link>
+          </el-col
         >
         <el-col :span="6">
+          <router-link to="/teacher" style="text-decoration: none;">
+
           <el-card class="teachers">
             <div class="items">
               <div class="left">
@@ -52,7 +62,9 @@
                 <span class="type">teachers</span>
               </div>
             </div>
-          </el-card></el-col
+          </el-card>
+          </router-link>
+          </el-col
         >
       </el-row>
     </div>
@@ -75,6 +87,8 @@ import { ElMessage } from "element-plus";
 import { onMounted, inject, reactive, getCurrentInstance } from "vue"; // 主要
 import { Course } from "./types/Course";
 onMounted(() => {
+  change(columnOption);
+  changetype(pieOption);
   getCoursesTotal();
   getTeachersTotal();
   getUseresTotal();
@@ -114,7 +128,7 @@ const columnOption = {
     feature: {
       dataView: { show: true, readOnly: false },
       magicType: { show: true, type: ["line", "bar"] },
-      restore: { show: true },
+      // restore: { show: true },
       saveAsImage: { show: true },
     },
   },
@@ -173,8 +187,8 @@ const columnOption = {
 };
 const pieOption = {
   legend: {
-    orient: 'vertical',
-    left: 'left'
+    orient: "vertical",
+    left: "left",
   },
   tooltip: {
     trigger: "item",
@@ -281,9 +295,7 @@ const getCourseListByType = (typeId: number) => {
         case 3:
           pieOption.series[0].data[2].value = res.data.data.totalItems;
       }
-      if (typeId == 3) {
-        changetype(pieOption);
-      }
+      pieOption && changetype(pieOption);
     },
     (err: any) => {
       console.log(err);
@@ -296,7 +308,7 @@ let echarts = inject("echarts"); // 主要
 // 基本柱形图
 const change = (option: any) => {
   const chartBox = echarts.init(document.getElementById("main") as HTMLElement); // 主要
-  chartBox.setOption(option);
+  option && chartBox.setOption(option);
   // 根据页面大小自动响应图表大小
   window.addEventListener("resize", function () {
     chartBox.resize();
@@ -312,7 +324,7 @@ const changetype = (option: any) => {
   const machart = echarts.init(document.getElementById("maychar"));
   // 设置配置项
   // 复制
-  machart.setOption(option);
+  option && machart.setOption(option);
   // 根据页面大小自动响应图表大小
   window.addEventListener("resize", function () {
     machart.resize();
@@ -321,8 +333,8 @@ const changetype = (option: any) => {
 </script>
 
 <style lang="scss" scoped>
-.container{
-overflow: hidden;
+.container {
+  overflow: hidden;
 }
 .top-info {
   margin-top: 20px;

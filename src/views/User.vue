@@ -14,8 +14,13 @@
         <el-button type="default" icon="DeleteFilled">批量删除</el-button>
       </div>
       <div class="search">
-        <el-input v-model="state.keyWord" placeholder="请输入内容" />
-        <el-button type="default" icon="Search"></el-button>
+        <el-button type="primary" icon="Search" 
+        style="margin-right: 10px"
+        @click="searchByUserName"
+        >搜索</el-button>
+        <el-input v-model="state.keyWord" placeholder="请输入用户姓名" 
+        @keyup.enter="searchByUserName"
+        />
       </div>
     </div>
     <div class="table">
@@ -164,6 +169,7 @@
             class="m-2"
             placeholder="选择班级"
             size="default"
+            value-key="item.id"
             :loading="state.classesLoading"
             loading-text="加载中..."
             multiple
@@ -301,15 +307,18 @@ function toAddUser() {
   state.userInfo.gender = null;
   state.userInfo.phone = null;
   state.userInfo.email = null;
+  state.userInfo.grades = [];
   console.log(state.userInfo);
 
   dialogVisible.value = true;
 }
 // 点击编辑课程按钮
 function toEditUser(courseItem: User) {
+  getClassesIdName()
   console.log(courseItem);
   isEdit.value = true;
   Object.assign(state.userInfo, courseItem);
+
   // state.userInfo.teacher.id = courseItem.teacher.teacherName;
   // state.userInfo.type.id = courseItem.type.name;
   console.log(state.userInfo);
@@ -362,6 +371,22 @@ const beforeFaceImgUpload = (rawFile: any) => {
   }
   return true;
 };
+// 
+const searchByUserName = (keyWord:any) => {
+  proxy.$API.default.user.reqGetUserListByKeyWord(pagination,state.keyWord).then(
+    (res: any) => {
+      console.log(res.data);
+      state.userList = res.data.data.users;
+      pagination.total = res.data.data.totalItems;
+      dialogVisible.value = false;
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error(err.message);
+    }
+  );
+
+}
 // 进入章节管理
 function gotoChapter(courseId: any) {
   router.push("/chapterList?courseId=" + courseId);

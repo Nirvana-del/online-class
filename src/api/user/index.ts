@@ -19,6 +19,26 @@ export const reqGetUserList = (pagination:any) => {
     })
 }
 
+// 根据关键词获取用户列表
+export const reqGetUserListByKeyWord = (pagination:any,keyWord:any) => {
+    let params = {}
+    if(pagination !== undefined){
+        const { currentPage, pageSize } = pagination
+         params = {
+            page: currentPage-1,
+            size: pageSize,
+            name:keyWord
+        }
+    }else{
+         params = {}
+    }
+    return request({
+        method: 'get',
+        url: `user/findAll`,
+        params
+    })
+}
+
 // 添加用户
 export const reqAddUser = (user:any) => {
    const { avatarUrl, email, gender, nickName, phone, grades } = user

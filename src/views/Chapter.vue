@@ -16,12 +16,31 @@
         >
         <!-- <el-button type="default" icon="DeleteFilled">批量删除</el-button> -->
       </div>
+      <div class="search">
+        <el-button
+          type="primary"
+          icon="Search"
+          @click="searchByChapterName(state.routeParams)"
+          class="button"
+          >搜索</el-button
+        >
+        <el-input
+          v-model="state.keyWord"
+          placeholder="请输入章节名称"
+          @keyup.enter="searchByChapterName(state.routeParams)"
+        />
+      </div>
     </div>
     <div class="table">
-      <el-table :data="state.chapterList" style="width: 100%" border>
+      <el-table
+        :data="state.chapterList"
+        style="width: 100%"
+        v-loading="state.tableLoading"
+        border
+      >
         <el-table-column
-          label="视频地址"
-          prop="videoUrl"
+          label="当前课程"
+          prop="course.name"
           header-align="center"
           align="center"
         />
@@ -32,11 +51,18 @@
           align="center"
         />
         <el-table-column
-          label="课程名"
-          prop="course.name"
+          label="视频地址"
+          prop="videoUrl"
           header-align="center"
           align="center"
-        />
+        >
+          <template v-slot="props">
+            <span class="video" @click="gotoVideo(props.row)">{{
+              props.row.videoUrl
+            }}</span>
+          </template>
+        </el-table-column>
+
         <el-table-column
           label="简介"
           prop="info"
@@ -44,12 +70,12 @@
           header-align="center"
           align="center"
         />
-        <el-table-column
+        <!-- <el-table-column
           label="当前进度"
           prop="state"
           header-align="center"
           align="center"
-        />
+        /> -->
         <el-table-column label="操作" header-align="center" align="center">
           <!-- <template #header>
             <el-input
@@ -91,7 +117,12 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="课程信息" width="30%" :lock-scroll="false">
+    <el-dialog
+      v-model="dialogVisible"
+      title="章节信息"
+      width="30%"
+      :lock-scroll="false"
+    >
       <el-form
         label-width="100px"
         :model="state.chapterList"
@@ -180,6 +211,8 @@ const state = reactive({
   chapterList: [] as Chapter[],
   chapterInfo: {} as Chapter,
   routeParams: {},
+  keyWord: "",
+  tableLoading: false,
 });
 const pagination = reactive({
   currentPage: 1,
@@ -200,17 +233,36 @@ function handleSizeChange(e: any) {
 const { proxy } = getCurrentInstance() as any;
 onMounted(() => {
   console.log(myUploadVideo);
-  
+
   console.log("route:", toRaw(route).query.value);
   state.routeParams = toRaw(route).query.value as unknown as RouteParams;
   getChapterList(state.routeParams);
 });
 const getChapterList = async (routeParams: any) => {
+  state.tableLoading = true;
   const courseId = routeParams.courseId;
   let res = await proxy.$API.default.chapter.getChapterList(
     courseId,
     pagination
   );
+  state.tableLoading = false;
+  console.log(res.data);
+  const { code, msg, data } = res.data;
+  if (code == "0") {
+    state.chapterList = data.sections;
+    pagination.total = res.data.data.totalItems;
+    dialogVisible.value = false;
+  }
+};
+const searchByChapterName = async (routeParams: any) => {
+  state.tableLoading = true;
+  const courseId = routeParams.courseId;
+  let res = await proxy.$API.default.chapter.getChapterListByKeyWord(
+    courseId,
+    pagination,
+    state.keyWord
+  );
+  state.tableLoading = false;
   console.log(res.data);
   const { code, msg, data } = res.data;
   if (code == "0") {
@@ -235,8 +287,8 @@ function toEditChapter(index: any, chapterInfo: any) {
   console.log(state.chapterInfo);
 
   const { courseId } = state.routeParams as RouteParams;
-  if(state.chapterInfo.course){
-    state.chapterInfo.course.id = courseId
+  if (state.chapterInfo.course) {
+    state.chapterInfo.course.id = courseId;
   }
 }
 function toAddChapter() {
@@ -252,9 +304,9 @@ function toAddChapter() {
   dialogVisible.value = true;
 
   const { courseId } = state.routeParams as RouteParams;
-    state.chapterInfo.course = {
-      id: courseId
-  }
+  state.chapterInfo.course = {
+    id: courseId,
+  };
   console.log("添加章节");
 }
 function buttonConfirm(): void {
@@ -305,16 +357,32 @@ const handleUploadSuccess = (response: any, uploadFile: any) => {
 function toCourseList() {
   router.push("/courseList");
 }
+const gotoVideo = (e: any) => {
+  console.log(e);
+  window.open(e.videoUrl);
+};
 </script>
 
 <style lang="scss" scoped>
 .chapter {
+  .table {
+    .video {
+      cursor: pointer;
+    }
+    .video:hover{
+      color: #F56C6C;
+    }
+  }
   .top-info {
     display: flex;
     justify-content: space-between;
     margin: 20px 0 20px;
     .search {
       display: flex;
+      justify-content: space-between;
+      .button {
+        margin-right: 10px;
+      }
     }
   }
   .bread-crumb {

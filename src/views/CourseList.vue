@@ -11,11 +11,21 @@
         <el-button type="default" icon="Plus" @click="toAddCourse"
           >添加课程</el-button
         >
-        <el-button type="default" icon="DeleteFilled">批量删除</el-button>
+        <!-- <el-button type="danger" icon="DeleteFilled" plain>批量删除</el-button> -->
       </div>
       <div class="search">
-        <el-input v-model="state.keyWord" placeholder="请输入课程名称" />
-        <el-button type="default" icon="Search" @click="searchByCourseName"></el-button>
+        <el-button
+          type="primary"
+          icon="Search"
+          @click="searchByCourseName"
+          style="margin-right:10px"
+        >搜索</el-button>
+        <el-input
+          v-model="state.keyWord"
+          placeholder="请输入课程名称"
+          @keyup.enter="searchByCourseName"
+        />
+       
       </div>
     </div>
     <div class="table">
@@ -23,6 +33,7 @@
         ref="multipleTableRef"
         :data="state.courseList"
         stripe
+        v-loading="state.tableLoading"
         border
         style="width: 100%"
       >
@@ -65,11 +76,11 @@
           label="课程类型"
           align="center"
           :filters="[
-        { text: '公开课', value: 1 },
-        { text: '定制课', value: 2 },
-        { text: '专家课', value: 3 },
-      ]"
-      :filter-method="filterHandler"
+            { text: '公开课', value: 1 },
+            { text: '定制课', value: 2 },
+            { text: '专家课', value: 3 },
+          ]"
+          :filter-method="filterHandler"
           show-overflow-tooltip
         />
         <el-table-column
@@ -174,8 +185,7 @@
             placeholder="填写课程名称"
           />
         </el-form-item>
-        <el-form-item label="课程类型："
-        required>
+        <el-form-item label="课程类型：" required>
           <el-select
             v-model="state.courseInfo.type.id"
             class="m-2"
@@ -250,7 +260,7 @@ import { ref, getCurrentInstance, onMounted, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import { Course } from "./types/Course/index";
 import { Teacher } from "./types/Teacher/index";
-import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
+import type { TableColumnCtx } from "element-plus/es/components/table/src/table-column/defaults";
 // 默认空图片
 const emptyImg = require("@/assets/empty.png");
 // 弹出框显示隐藏
@@ -264,6 +274,7 @@ const state = reactive({
   teacherList: [] as Teacher[],
   courseTypeList: [] as Course[],
   keyWord: "",
+  tableLoading: false,
   teacherLoading: false,
   courseTypeLoading: false,
 });
@@ -284,25 +295,30 @@ const filterHandler = (
   column: TableColumnCtx<Course>
 ) => {
   console.log(column);
-  
-  const property = column['property']
-  return row[property] === value
-}
+
+  const property = column["property"];
+  return row[property] === value;
+};
 
 const searchByCourseName = () => {
-  proxy.$API.default.course.getCourseListByKeyWord(pagination,state.keyWord).then(
-    (res: any) => {
-      console.log(res.data);
-      state.courseList = res.data.data.courses;
-      pagination.total = res.data.data.totalItems;
-      dialogVisible.value = false;
-    },
-    (err: any) => {
-      console.log(err);
-      ElMessage.error(err.message);
-    }
-  );
-}
+  state.tableLoading = true;
+  proxy.$API.default.course
+    .getCourseListByKeyWord(pagination, state.keyWord)
+    .then(
+      (res: any) => {
+        console.log(res.data);
+        state.courseList = res.data.data.courses;
+        pagination.total = res.data.data.totalItems;
+        dialogVisible.value = false;
+        state.tableLoading = false;
+      },
+      (err: any) => {
+        console.log(err);
+        state.tableLoading = false;
+        ElMessage.error(err.message);
+      }
+    );
+};
 
 // 获取课程ID名称集合
 const getCourseIdName = (val: Boolean): void => {
@@ -313,7 +329,7 @@ const getCourseIdName = (val: Boolean): void => {
       console.log(res.data);
       const { code, msg, data } = res.data;
       if (code == "0") {
-        state.courseTypeList = data;
+        state.courseTypeList = data.types;
       }
       state.courseTypeLoading = false;
     });
@@ -369,16 +385,20 @@ function editCourseItem(): void {
 }
 // 获取课程列表
 function getCourseList(): void {
+  state.tableLoading = true;
+
   proxy.$API.default.course.getCourseList(pagination).then(
     (res: any) => {
       console.log(res.data);
       state.courseList = res.data.data.courses;
       pagination.total = res.data.data.totalItems;
       dialogVisible.value = false;
+      state.tableLoading = false;
     },
     (err: any) => {
       console.log(err);
       ElMessage.error(err.message);
+      state.tableLoading = false;
     }
   );
 }
@@ -403,7 +423,9 @@ function toAddCourse() {
   dialogVisible.value = true;
 }
 // 点击编辑课程按钮
-function toEditCourse(courseItem: Course) {
+const toEditCourse = (courseItem: Course) => {
+  getTeacherIdName(true)
+  getCourseIdName(true)
   console.log(courseItem);
   isEdit.value = true;
   Object.assign(state.courseInfo, courseItem);
@@ -422,13 +444,13 @@ function buttonConfirm(): void {
     return;
   }
   console.log(obj.period);
-  
+
   if (obj.period! > 48) {
     ElMessage({
       message: "课时",
       type: "warning",
     });
-    return
+    return;
   }
   if (isEdit.value == true) {
     editCourseItem();

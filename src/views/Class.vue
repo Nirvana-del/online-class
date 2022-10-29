@@ -1,21 +1,32 @@
 <template>
   <div class="teacher-list">
     <div class="bread-crumb">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item to="/class">班级</el-breadcrumb-item>
-            <el-breadcrumb-item>班级管理</el-breadcrumb-item>
-          </el-breadcrumb>
-        </div>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item to="/class">班级</el-breadcrumb-item>
+        <el-breadcrumb-item>班级管理</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
     <div class="top-info">
       <div class="operation">
-        <el-button type="default" icon="Plus" @click="toAddClassess"
+        <el-button type="default" icon="Plus" @click="toAddClassess" 
           >添加班级</el-button
         >
         <el-button type="default" icon="DeleteFilled">批量删除</el-button>
       </div>
       <div class="search">
-        <el-input v-model="state.keyWord" placeholder="请输入内容" />
-        <el-button type="default" icon="Search"></el-button>
+        <el-button
+          type="primary"
+          icon="Search"
+          @click="searchByClassesName()"
+          class="button"
+          style="margin-right:10px"
+          >搜索</el-button
+        >
+        <el-input
+          v-model="state.keyWord"
+          placeholder="请输入班级名称"
+          @keyup.enter="searchByClassesName()"
+        />
       </div>
     </div>
     <div class="table">
@@ -54,7 +65,7 @@
         >
         </el-table-column>
         <el-table-column
-          property="headteacher.nickName"
+          property="headteacher.teacherName"
           label="班主任"
           header-align="center"
           align="center"
@@ -96,13 +107,18 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog v-model="dialogVisible" title="班级信息" width="30%" :lock-scroll="false">
+    <el-dialog
+      v-model="dialogVisible"
+      title="班级信息"
+      width="30%"
+      :lock-scroll="false"
+    >
       <el-form
         label-width="100px"
         :model="state.classesList"
         style="max-width: 460px"
       >
-      <el-form-item label="班级封面：">
+        <el-form-item label="班级封面:">
           <el-upload
             class="avatar-uploader"
             action="/api/common/uploadImage"
@@ -119,14 +135,12 @@
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
-        <el-form-item label="班级名称：">
+        <el-form-item label="班级名称:" required>
           <el-input v-model="state.classInfo.name" placeholder="班级名称" />
         </el-form-item>
-        <el-form-item label="班训:">
-          <el-input v-model="state.classInfo.atmosphere" placeholder="班训" />
-        </el-form-item>
-        <el-form-item label="班主任:">
-            <el-select
+      
+        <el-form-item label="班主任:" required>
+          <el-select
             v-model="state.classInfo.headteacher.id"
             class="m-2"
             placeholder="选择班主任"
@@ -142,6 +156,9 @@
               :value="item.id"
             />
           </el-select>
+        </el-form-item>
+        <el-form-item label="班训:">
+          <el-input v-model="state.classInfo.atmosphere" placeholder="班训" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -169,7 +186,8 @@ const state = reactive({
   classInfo: {} as Classes,
   teacherList: [] as Teacher[],
   keyWord: "",
-  teacherLoading: false
+  teacherLoading: false,
+  tableLoading: false,
 });
 const pagination = reactive({
   currentPage: 1,
@@ -197,23 +215,31 @@ const handleCurrentChange = (e: any) => {
   console.log(e);
   pagination.currentPage = e;
   getClasserList();
-}
+};
 // 改变页大小
 const handleSizeChange = (e: any) => {
   console.log(e);
   pagination.pageSize = e;
   pagination.currentPage = 1;
   getClasserList();
-}
+};
 
 // 弹出框确定按钮
 const buttonConfirm = (): void => {
+  if(state.classInfo.name == null || state.classInfo.headteacher == null){
+    ElMessage({
+      message: "必填项不能为空",
+      type: "warning",
+    });
+    return
+  }
+
   if (isEdit.value == true) {
     editClassess();
   } else {
     addClasses();
   }
-}
+};
 
 // 添加班级信息
 const addClasses = (): void => {
@@ -239,25 +265,54 @@ const deleteClass = (row: Classes): void => {
       getClasserList();
     }
   });
-}
+};
+// 通过关键词查询班级列表
+const searchByClassesName = (): void => {
+  console.log(proxy.$API.default);
+
+  proxy.$API.default.classes
+    .reqGetClassListByKeyWord(pagination, state.keyWord)
+    .then(
+      (res: any) => {
+        console.log(res.data);
+        const { code, msg, data } = res.data;
+        if (code == "0") {
+          state.classesList = data.grades;
+          pagination.total = data.totalItems;
+          dialogVisible.value = false;
+        }
+      },
+      (err: any) => {
+        ElMessage.error(err.message);
+        state.tableLoading = false;
+      }
+    );
+};
 // 查询班级列表
 const getClasserList = (): void => {
   console.log(proxy.$API.default);
-
-  proxy.$API.default.classes.reqGetClassList(pagination).then((res: any) => {
-    console.log(res.data);
-    const { code, msg, data } = res.data;
-    if (code == "0") {
-      state.classesList = data.grades;
-      pagination.total = data.totalItems;
-      dialogVisible.value = false;
+  state.tableLoading = true;
+  proxy.$API.default.classes.reqGetClassList(pagination).then(
+    (res: any) => {
+      console.log(res.data);
+      state.tableLoading = false;
+      const { code, msg, data } = res.data;
+      if (code == "0") {
+        state.classesList = data.grades;
+        pagination.total = data.totalItems;
+        dialogVisible.value = false;
+      }
+    },
+    (err: any) => {
+      ElMessage.error(err.message);
+      state.tableLoading = false;
     }
-  });
-}
+  );
+};
 // 修改班级信息
 const editClassess = (): void => {
-  proxy.$API.default.teacher
-    .updateCourseItem(state.classInfo)
+  proxy.$API.default.classes
+    .reqUpdateClassesItem(state.classInfo)
     .then((res: any) => {
       console.log(res);
       const { code, data, msg } = res.data;
@@ -266,10 +321,10 @@ const editClassess = (): void => {
         isEdit.value = false;
       }
     });
-}
+};
 
-// 点击添加班级按钮 
-const toAddClassess = () =>{
+// 点击添加班级按钮
+const toAddClassess = () => {
   isEdit.value = false;
   state.classInfo.name = null;
   state.classInfo.atmosphere = null;
@@ -277,19 +332,20 @@ const toAddClassess = () =>{
   state.classInfo.headteacher = {
     id: null,
     nickName: "",
-  }
+  };
   console.log(state.classInfo);
 
   dialogVisible.value = true;
-}
+};
 // 点击编辑班级按钮
 const toEditClass = (classInfo: Classes) => {
+  getTeacherIdName(true)
   console.log(classInfo);
   isEdit.value = true;
   Object.assign(state.classInfo, classInfo);
   console.log(state.classInfo);
   dialogVisible.value = true;
-}
+};
 
 // 班级封面上传成功回调
 const handleFaceImgSuccess = (response: any, uploadFile: any) => {
@@ -314,7 +370,7 @@ const beforeFaceImgUpload = (rawFile: any) => {
   return true;
 };
 
-//时间戳格式化 
+//时间戳格式化
 const dateFormat = (time: string): string => {
   var data = new Date(time); //获取年
   var y = data.getFullYear(); //获取月
@@ -329,7 +385,7 @@ const dateFormat = (time: string): string => {
   //var secounds = data.getSeconds()<10 ? 'O' + data.getSeconds() : data.getSeconds();
   //输出结果
   return `${y}-${m}-${d} ${hours}:${minutes}`;
-}
+};
 onMounted(() => {
   getClasserList();
 });

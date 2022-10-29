@@ -1,5 +1,5 @@
 import request from '@/utils/axios/request'
-
+// 获取章节列表
 export const getChapterList = (courseId:any, pagination:any) => {
     const { currentPage, pageSize } = pagination
     return request({
@@ -9,6 +9,22 @@ export const getChapterList = (courseId:any, pagination:any) => {
             courseId,
             page: currentPage - 1,
             size: pageSize,
+            sort: 'id,asc'
+        }
+    })
+}
+
+// 通过关键字获取章节列表
+export const getChapterListByKeyWord = (courseId:any, pagination:any,keyWord:any) => {
+    const { currentPage, pageSize } = pagination
+    return request({
+        method: 'get',
+        url: `/section/findAll`,
+        params: {
+            courseId,
+            page: currentPage - 1,
+            size: pageSize,
+            name: keyWord,
             sort: 'id,asc'
         }
     })
